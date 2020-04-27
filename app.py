@@ -45,8 +45,30 @@ def create_todo():
     
     # description = request.form.get('description','')
     # return redirect(url_for('index'))
+
+#updated task
+@app.route('/todos/<todo_id>/set-completed', methods=['POST'])
+def set_completed_todo(todo_id):
+    # error = False
+    # body = {}
+    try:
+        completed = request.get_json()['completed']
+        todo = Todo.query.get(todo_id)
+        todo.completed = completed
+        db.session.commit()
+        # body['completed'] = todo.completed
+    except:
+        # error = True
+        db.session.rollback()
+        # print(sys.exc_info())
+    finally:
+        db.session.close()
+    
+    return redirect(url_for('index'))
+    # if not error:
+    #     return jsonify(body)
  
 
 @app.route('/')
 def index():
-    return render_template('index.html',data=Todo.query.all())
+    return render_template('index.html',data=Todo.query.order_by('id').all())

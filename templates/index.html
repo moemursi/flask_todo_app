@@ -10,9 +10,10 @@
             display:none;
              color:brown; 
              size:3em;
-
         }
-
+        ul{
+            list-style: none;
+        }
     </style>
 </head>
 <body>
@@ -24,11 +25,45 @@
         <div id="error" class="hidden"> Something Wrong Happened while submetting</div>
         <ul id="todos">
             {% for d in data %}
-            <li>{{d.description}}</li>
-
+            <li>
+                <input type="checkbox" class="check-completed" data-id="{{ d.id }}" name="checkbox" id="checkbox" 
+                  {% if d.completed %}
+                    checked
+                  {% endif  %}
+                
+                /> 
+                {{d.description}}
+            </li>
             {% endfor  %}
         </ul>
     <script>
+        const checkboxes = document.querySelectorAll('.check-completed');
+        for(let i=0;i<checkboxes.length;i++){
+            const checkbox = checkboxes[i];
+            checkbox.onchange = function(e){
+                console.log('event',e);
+                const newCompleted = e.target.checked;
+                const todoId = e.target.dataset['id']
+                fetch('/todos/' + todoId + '/set-completed',{
+                    method :'POST',
+                    body: JSON.stringify({
+                        'completed': newCompleted
+                    }),
+                    headers: {
+                        'Content-Type' : 'application/json'
+                    }
+                })
+                .then(function(){
+                    document.getElementById('error').className = 'hidden';
+                })
+                .catch(function() {
+
+                    document.getElementById('error').className = '';
+                })
+            }
+        }
+
+
         const descInput = document.getElementById('description');
         document.getElementById('form').onsubmit = function(e) {
             e.preventDefault();
